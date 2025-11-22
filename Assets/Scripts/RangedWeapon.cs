@@ -38,6 +38,7 @@ public class RangedWeapon : Weapon
         newProjectile.tag = "Friendly";
         newProjectile.RotateToTarget(thisPlayer.mousePos);
         newProjectile.damage = damage;
+        newProjectile.originEntity = thisPlayer;
     }
 
     public virtual void StartReload()

@@ -1,19 +1,41 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Enemy : Entity
 {
-    //public EnemyAttack mainAttack;
+    [Header("Attacks")]
+    public EnemyAttack mainAttack;
+    public EnemyAttack mainAttackInstance;
     
     [Header("Movement")]
     public Transform[] possibleDirections;
+    [Header("Distance")]
     public float closestTargetDistance;
     public float maximumTargetDistance;
+    public float targetBuffer;
+    public float targetBufferMax;
+    [Header("Dot Percentages")]
     public float forwardPercent;
     public float strafePercent;
+    public float xSign = -1f;
+    public float ySign = 1f;
+
+    private void Start()
+    {
+        targetBuffer = Random.Range(targetBuffer, targetBufferMax);
+        mainAttackInstance = Instantiate(mainAttack, transform);
+        mainAttackInstance.thisEnemy = this;
+    }
+
     private void Update()
     {
-        //mainAttack.TryAttack();
+        if (mainAttackInstance.TryAttack() && Random.Range(0f,2f) > 1f)
+        {
+            xSign = -xSign;
+            ySign = -ySign;
+        }
     }
 
     private void FixedUpdate()
@@ -24,8 +46,7 @@ public class Enemy : Entity
             Vector3 directionToTarget = (closestTarget.transform.position - transform.position).normalized;
             Vector3 directionToMove = directionToTarget;
             float currentHighestScore = float.NegativeInfinity;
-            Vector3 strafeDirection = new Vector3(directionToTarget.y, -directionToTarget.x);
-            Vector3 directionToStrafe = strafeDirection;
+            Vector3 strafeDirection = new Vector3(directionToTarget.y * ySign, directionToTarget.x * xSign);
             foreach (Transform direction in possibleDirections)
             {
                 Vector3 directionToPoint = (direction.position - transform.position).normalized;
@@ -38,23 +59,22 @@ public class Enemy : Entity
                     //Debug.Log($"{finalScore} is higher than current score: {currentHighestScore}");
                     currentHighestScore = finalScore;
                     directionToMove = directionToPoint;
-                    directionToStrafe = new Vector3(directionToPoint.y, -directionToPoint.x);;
                 }
             }
-            if (distanceToTarget < closestTargetDistance)
+            if (distanceToTarget < closestTargetDistance - targetBuffer)
             {
                 rb.linearVelocity = -directionToTarget * speed;
             }
-            else if (distanceToTarget >= closestTargetDistance && distanceToTarget < maximumTargetDistance)
-            {
-                forwardPercent = 0.1f; 
-                strafePercent = 0.9f;
-                rb.linearVelocity = directionToStrafe * speed;
-            }
-            else
+            else if (distanceToTarget > maximumTargetDistance + targetBuffer)
             {
                 forwardPercent = 0.5f; 
                 strafePercent = 0.5f;
+                rb.linearVelocity = directionToMove * speed;
+            }
+            else
+            {
+                forwardPercent = 0.1f; 
+                strafePercent = 0.9f;
                 rb.linearVelocity = directionToMove * speed;
             }
         }
