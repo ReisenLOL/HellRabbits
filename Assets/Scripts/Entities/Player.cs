@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public class Player : Entity
@@ -13,11 +14,14 @@ public class Player : Entity
     public Weapon secondary;
     private Weapon secondaryWeaponInstance;
     private Weapon currentlyEquipped;
+    [Header("UI")]
+    public TextMeshProUGUI weaponText;
     private void Start()
     {
         primaryWeaponInstance = Instantiate(primary, weaponFolder);
         primaryWeaponInstance.thisPlayer = this;
         //secondaryWeaponInstance = Instantiate(secondary, weaponFolder);
+        //secondaryWeaponInstance.thisPlayer = this;
         currentlyEquipped = primaryWeaponInstance;
     }
 
@@ -31,12 +35,33 @@ public class Player : Entity
         mousePos = cam.ScreenToWorldPoint(Input.mousePosition + new Vector3(0,0,cam.nearClipPlane));
     }
 
+    private void WeaponSwitch()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            primaryWeaponInstance.gameObject.SetActive(true);
+            currentlyEquipped = primaryWeaponInstance;
+            secondaryWeaponInstance.gameObject.SetActive(false);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            secondaryWeaponInstance.gameObject.SetActive(true);
+            currentlyEquipped = secondaryWeaponInstance;
+            primaryWeaponInstance.gameObject.SetActive(false);
+        }
+    }
     private void Update()
     {
         HandleMovement();
+        WeaponSwitch();
         if (Input.GetMouseButton(0))
         {
             currentlyEquipped.TryAttack();
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            currentlyEquipped.StartReload();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,6 +16,12 @@ public class RangedWeapon : Weapon
     private float currentReloadTime;
 
     [SerializeField] private Transform firePoint;
+
+    private void Start()
+    {
+        UpdateUI();
+    }
+
     protected override void Update()
     {
         base.Update();
@@ -34,6 +41,7 @@ public class RangedWeapon : Weapon
 
     protected override void AttackEffects()
     {
+        UpdateUI();
         Projectile newProjectile = Instantiate(projectile, firePoint.position, firePoint.rotation);
         newProjectile.tag = "Friendly";
         newProjectile.RotateToTarget(thisPlayer.mousePos);
@@ -41,13 +49,29 @@ public class RangedWeapon : Weapon
         newProjectile.originEntity = thisPlayer;
     }
 
-    public virtual void StartReload()
+    public override void TryAttack()
+    {
+        if (currentBullets > 0)
+        {
+            base.TryAttack();
+        }
+    }
+
+    public override void StartReload()
     {
         currentReloadTime = reloadLength;
     }
     protected virtual void Reload()
     {
-        currentMagazine--;
-        currentBullets = bulletCapacity;
+        if (currentMagazine > 0)
+        {
+            currentMagazine--;
+            currentBullets = bulletCapacity;
+        }
+    }
+
+    protected virtual void UpdateUI()
+    {
+        thisPlayer.weaponText.text = $"Mags: {currentMagazine}/{magazineCapacity}\nBullets: {currentBullets}/{bulletCapacity}";
     }
 }

@@ -1,15 +1,24 @@
+using System;
 using UnityEngine;
 
 public class Spell : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public string spellName;
+    public float spellCastingTime;
+    public float spellCooldown;
+    public float currentCooldown;
+
+    private void Update()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected void CastSpell()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    protected void SpellEffects()
     {
         
     }
